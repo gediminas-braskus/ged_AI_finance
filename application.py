@@ -39,6 +39,9 @@ db = SQL("sqlite:///finance.db")
 if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
 
+if not os.environ.get("secret_key"):
+    raise RuntimeError("secret_key not set")
+
 
 @app.route("/")
 @login_required
