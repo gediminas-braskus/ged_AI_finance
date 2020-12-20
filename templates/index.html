@@ -1,51 +1,47 @@
-{% extends "layout.html" %}
-
-{% block title %}
-    Portfolio
-{% endblock %}
-
-{% block main %}
-    <table class="table table-bordered">
-        <tr class="main-row">
-            <th>Stock</th>
-            <th>Symbol</th>
-            <th>Shares</th>
-            <th>Price</th>
-            <th>TOTAL</th>
-            <th>Bought TOTAL</th>
-            <th>GAIN</th>
-        </tr>
-        {% for p in portfolio %}
-        {% if p["shares"] == 0 %}
-        {% else %}
-        <tr class="rows">
-            <td class="td">{{ p["stock"] }}</td>
-            <td class="td">{{ p["symbol"] }}</td>
-            <td class="td">{{ p["shares"] }}</td>
-            <td class="td">{{ p["price"]|usd }}</td>
-            <td class="td">{{ p["total"]|usd }}</td>
-            <td class="td">{{ p["bought_total"]|usd }}</td>
-            <td class="{% if p['gain'] >= 0 %}green{% else %}red{% endif %}">{{ p["gain"]|usd }}</td>
-        </tr>
-        {% endif %}
-        {% endfor %}
-        <tr class="main-row">
-            <th>CASH</th>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>{{ cash|usd }}</td>
-            <td>{{ cash|usd }}</td>
-            <td></td>
-        </tr>
-        <tr class="main-row">
-            <th>Grand TOTAL</th>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>{{ grand_total|usd }}</td>
-            <td>{{ bought_grand_total|usd }}</td>
-            <td class="{% if gain_total >= 0 %}green{% else %}red{% endif %}">{{ gain_total|usd }}</td>
-        </tr>
-    </table>
+{% extends "layout.html" %} {% block title %} Portfolio {% endblock %} {% block
+main %}
+<table class="table table-bordered">
+  <tr class="main-row">
+    <th>Stock</th>
+    <th>Symbol</th>
+    <th>Shares</th>
+    <th>Price</th>
+    <th>TOTAL</th>
+    <th>Bought TOTAL</th>
+    <th>GAIN</th>
+  </tr>
+  {% for p in portfolio %} {% if p["shares"] == 0 %} {% else %}
+  <tr class="rows">
+    <td class="td">{{ p["stock"] }}</td>
+    <td class="td">{{ p["symbol"] }}</td>
+    <td class="td">{{ p["shares"] }}</td>
+    <td class="td">{{ p["price"]|usd }}</td>
+    <td class="td">{{ p["total"]|usd }}</td>
+    <td class="td">{{ p["bought_total"]|usd }}</td>
+    <td class="{% if p['gain'] >= 0 %}green{% else %}red{% endif %}">
+      {{ p["gain"]|usd }}
+    </td>
+  </tr>
+  {% endif %} {% endfor %}
+  <tr class="main-row">
+    <th>CASH</th>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>{{ cash|usd }}</td>
+    <td>{{ cash|usd }}</td>
+    <td></td>
+  </tr>
+  <tr class="main-row">
+    <th>Grand TOTAL</th>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>{{ grand_total|usd }}</td>
+    <td>{{ bought_grand_total|usd }}</td>
+    <td class="{% if gain_total >= 0 %}green{% else %}red{% endif %}">
+      {{ gain_total|usd }}
+    </td>
+  </tr>
+</table>
 {% endblock %}

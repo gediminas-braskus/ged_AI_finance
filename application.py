@@ -16,12 +16,15 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 # Ensure responses aren't cached
+
+
 @app.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
+
 
 # Custom filter
 app.jinja_env.filters["usd"] = usd
@@ -47,8 +50,10 @@ if not os.environ.get("secret_key"):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    username = db.execute("SELECT username FROM users WHERE id = :user_id", user_id = session['user_id'])[0]["username"]
-    portfolio = db.execute("SELECT stock, symbol, SUM(shares) as shares, SUM(price * shares) as bought_total FROM buy WHERE username = :username GROUP BY stock, symbol", username=username)
+    username = db.execute("SELECT username FROM users WHERE id = :user_id",
+                          user_id=session['user_id'])[0]["username"]
+    portfolio = db.execute(
+        "SELECT stock, symbol, SUM(shares) as shares, SUM(price * shares) as bought_total FROM buy WHERE username = :username GROUP BY stock, symbol", username=username)
     grand_total = 0
     bought_grand_total = 0
     for p in portfolio:
@@ -57,7 +62,8 @@ def index():
         grand_total += p["total"]
         p["gain"] = p["total"] - p["bought_total"]
         bought_grand_total += p["bought_total"]
-    cash = db.execute("SELECT cash FROM users WHERE id = :user_id", user_id = session['user_id'])[0]["cash"]
+    cash = db.execute("SELECT cash FROM users WHERE id = :user_id",
+                      user_id=session['user_id'])[0]["cash"]
     grand_total += cash
     bought_grand_total += cash
     gain_total = grand_total - bought_grand_total
@@ -81,15 +87,20 @@ def buy():
         stock = lookup(request.form.get("symbol"))["name"]
         symbol = lookup(request.form.get("symbol"))["symbol"]
         shares = int(request.form.get("shares"))
-        cash = db.execute("SELECT cash FROM users WHERE id = :user_id", user_id = session['user_id'])[0]["cash"]
+        cash = db.execute("SELECT cash FROM users WHERE id = :user_id",
+                          user_id=session['user_id'])[0]["cash"]
         balance = cash - (price * shares)
         if balance < 0:
             return apology("you don't have enough money", 403)
         else:
-            db.execute("UPDATE users SET cash = :balance WHERE id = :user_id", balance = balance, user_id = session['user_id'])
-            username = db.execute("SELECT username FROM users WHERE id = :user_id", user_id = session['user_id'])[0]["username"]
-            db.execute("INSERT INTO buy (price, username, shares, stock, symbol) VALUES(:price, :username, :shares, :stock, :symbol)", price=price, username=username, shares=shares, stock=stock, symbol=symbol)
-            db.execute("INSERT INTO archive (username, stock, symbol, shares, price) VALUES(:username, :stock, :symbol, :shares, :price)", username=username, stock=stock, symbol=symbol, shares=shares, price=price)
+            db.execute("UPDATE users SET cash = :balance WHERE id = :user_id",
+                       balance=balance, user_id=session['user_id'])
+            username = db.execute(
+                "SELECT username FROM users WHERE id = :user_id", user_id=session['user_id'])[0]["username"]
+            db.execute("INSERT INTO buy (price, username, shares, stock, symbol) VALUES(:price, :username, :shares, :stock, :symbol)",
+                       price=price, username=username, shares=shares, stock=stock, symbol=symbol)
+            db.execute("INSERT INTO archive (username, stock, symbol, shares, price) VALUES(:username, :stock, :symbol, :shares, :price)",
+                       username=username, stock=stock, symbol=symbol, shares=shares, price=price)
             flash("Bought!", "bought")
             return redirect("/")
     else:
@@ -111,12 +122,15 @@ def check():
 
     return jsonify(True)
 
+
 @app.route("/history")
 @login_required
 def history():
     """Show history of transactions"""
-    username = db.execute("SELECT username FROM users WHERE id = :user_id", user_id = session['user_id'])[0]["username"]
-    history = db.execute("SELECT stock, symbol, shares, price, date FROM archive WHERE username = :username", username=username)
+    username = db.execute("SELECT username FROM users WHERE id = :user_id",
+                          user_id=session['user_id'])[0]["username"]
+    history = db.execute(
+        "SELECT stock, symbol, shares, price, date FROM archive WHERE username = :username", username=username)
     return render_template("history.html", history=history)
 
 
@@ -209,7 +223,8 @@ def register():
             if registered_username["username"] == username:
                 return apology("username already exists", 400)
 
-        db.execute("INSERT INTO users (username, hash) VALUES(:username, :password)", username=request.form.get("username"), password=generate_password_hash(request.form.get("password")))
+        db.execute("INSERT INTO users (username, hash) VALUES(:username, :password)", username=request.form.get(
+            "username"), password=generate_password_hash(request.form.get("password")))
 
         flash("Registration went successfully!", "registration")
         return redirect("/login")
@@ -227,12 +242,14 @@ def sell():
             return apology("select stock which you want to sell", 400)
         elif not request.form.get("shares"):
             return apology("type number of shares you want to sell", 400)
-        username = db.execute("SELECT username FROM users WHERE id = :user_id", user_id = session['user_id'])[0]['username']
+        username = db.execute("SELECT username FROM users WHERE id = :user_id",
+                              user_id=session['user_id'])[0]['username']
         symbol = request.form.get("symbol")
         price = lookup(symbol)["price"]
         stock = lookup(symbol)["name"]
         shares = int(request.form.get("shares"))
-        user_shares = db.execute("SELECT symbol, SUM(shares) as shares FROM buy WHERE username = :username GROUP BY symbol", username=username)
+        user_shares = db.execute(
+            "SELECT symbol, SUM(shares) as shares FROM buy WHERE username = :username GROUP BY symbol", username=username)
         u_shares = []
         for u in user_shares:
             if u["symbol"] == symbol:
@@ -240,27 +257,38 @@ def sell():
         if shares > u_shares[0]:
             return apology("you don't have that many shares", 400)
         elif shares == u_shares[0]:
-            db.execute("INSERT INTO archive (username, stock, symbol, shares, price) VALUES(:username, :stock, :symbol, -:shares, :price)", username=username, stock=stock, symbol=symbol, shares=shares, price=price)
-            db.execute("DELETE FROM buy WHERE username = :username and stock = :stock and symbol = :symbol", username = username, stock = stock, symbol = symbol)
+            db.execute("INSERT INTO archive (username, stock, symbol, shares, price) VALUES(:username, :stock, :symbol, -:shares, :price)",
+                       username=username, stock=stock, symbol=symbol, shares=shares, price=price)
+            db.execute("DELETE FROM buy WHERE username = :username and stock = :stock and symbol = :symbol",
+                       username=username, stock=stock, symbol=symbol)
             total1 = price * shares
-            cash1 = db.execute("SELECT cash FROM users WHERE id = :user_id", user_id = session['user_id'])[0]["cash"]
+            cash1 = db.execute(
+                "SELECT cash FROM users WHERE id = :user_id", user_id=session['user_id'])[0]["cash"]
             balance1 = total1 + cash1
-            db.execute("UPDATE users SET cash = :balance1 WHERE id = :user_id", balance1=balance1, user_id=session['user_id'])
+            db.execute("UPDATE users SET cash = :balance1 WHERE id = :user_id",
+                       balance1=balance1, user_id=session['user_id'])
             flash("Sold!", "sold")
             return redirect("/")
         else:
             total = price * shares
-            cash = db.execute("SELECT cash FROM users WHERE id = :user_id", user_id = session['user_id'])[0]["cash"]
+            cash = db.execute("SELECT cash FROM users WHERE id = :user_id",
+                              user_id=session['user_id'])[0]["cash"]
             balance = total + cash
-            db.execute("UPDATE users SET cash = :balance WHERE id = :user_id", balance=balance, user_id=session['user_id'])
-            db.execute("INSERT INTO buy (username, stock, symbol, shares, price) VALUES(:username, :stock, :symbol, -:shares, :price)", username=username, stock=stock, symbol=symbol, shares=shares, price=price)
-            db.execute("INSERT INTO archive (username, stock, symbol, shares, price) VALUES(:username, :stock, :symbol, -:shares, :price)", username=username, stock=stock, symbol=symbol, shares=shares, price=price)
+            db.execute("UPDATE users SET cash = :balance WHERE id = :user_id",
+                       balance=balance, user_id=session['user_id'])
+            db.execute("INSERT INTO buy (username, stock, symbol, shares, price) VALUES(:username, :stock, :symbol, -:shares, :price)",
+                       username=username, stock=stock, symbol=symbol, shares=shares, price=price)
+            db.execute("INSERT INTO archive (username, stock, symbol, shares, price) VALUES(:username, :stock, :symbol, -:shares, :price)",
+                       username=username, stock=stock, symbol=symbol, shares=shares, price=price)
             flash("Sold!", "sold")
             return redirect("/")
     else:
-        username = db.execute("SELECT username FROM users WHERE id = :user_id", user_id = session['user_id'])[0]['username']
-        symbols = db.execute("SELECT symbol, SUM(shares) as shares FROM buy WHERE username = :username GROUP BY symbol", username = username)
+        username = db.execute("SELECT username FROM users WHERE id = :user_id",
+                              user_id=session['user_id'])[0]['username']
+        symbols = db.execute(
+            "SELECT symbol, SUM(shares) as shares FROM buy WHERE username = :username GROUP BY symbol", username=username)
         return render_template("sell.html", symbols=symbols)
+
 
 def errorhandler(e):
     """Handle error"""

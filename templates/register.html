@@ -1,63 +1,78 @@
-{% extends "layout.html" %}
+{% extends "layout.html" %} {% block title %} Register {% endblock %} {% block
+main %}
+<form action="/register" method="post">
+  <div class="form-group">
+    <input
+      autocomplete="off"
+      autofocus
+      class="form-control"
+      name="username"
+      placeholder="Username"
+      type="text"
+    />
+  </div>
+  <div class="form-group error not-visible">
+    Username already exists OR Invalid username
+  </div>
+  <div class="form-group">
+    <input
+      class="form-control"
+      name="password"
+      placeholder="Password"
+      type="password"
+    />
+  </div>
+  <div class="form-group">
+    <input
+      class="form-control"
+      name="confirmation"
+      placeholder="Confirm Password"
+      type="password"
+    />
+  </div>
+  <div class="form-group">
+    <button class="btn btn-primary" name="button" type="submit">
+      Register
+    </button>
+  </div>
+</form>
 
-{% block title %}
-    Register
-{% endblock %}
+<script>
+  const inputElement = document.querySelector("[name='username']");
+  const register = document.querySelector("form");
 
-{% block main %}
-    <form action="/register" method="post">
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
-        </div>
-        <div class="form-group error not-visible">Username already exists OR Invalid username</div>
-        <div class="form-group">
-            <input class="form-control" name="password" placeholder="Password" type="password">
-        </div>
-        <div class="form-group">
-            <input class="form-control" name="confirmation" placeholder="Confirm Password" type="password">
-        </div>
-        <div class="form-group">
-            <button class="btn btn-primary" name="button" type="submit">Register</button>
-        </div>
-    </form>
+  if (inputElement) {
+    // Priskiriam jam blur event handler
+    inputElement.addEventListener("blur", function () {
+      // Kai nutinka blur, kodas ateina cia
 
-    <script>
-        const inputElement = document.querySelector("[name='username']");
-        const register = document.querySelector("form");
+      const SERVER_API = "/check?username=" + inputElement.value;
 
-        if (inputElement) {
-        // Priskiriam jam blur event handler
-        inputElement.addEventListener("blur", function() {
-          // Kai nutinka blur, kodas ateina cia
+      // Siunciam HTTP GET request
+      fetch(SERVER_API)
+        .then(function (response) {
+          // Kai gaunam atsakyma is serverio, kodas ateina cia
 
-        const SERVER_API = "/check?username=" + inputElement.value;
-
-          // Siunciam HTTP GET request
-          fetch(SERVER_API)
-            .then(function (response) {
-              // Kai gaunam atsakyma is serverio, kodas ateina cia
-
-              // Prasom serverio duomenu JSON formatu
-              return response.json();
-            })
-            .then(function (responseJson) {
-              // Kai gaunam 100% duomenu JSON formatu, kodas ateina cia
-              const classes = document.querySelector(".error").classList;
-            // responseJson == false
-              if (responseJson == false) {
-                classes.remove("not-visible");
-                register.addEventListener("submit", function(event) {
-                  event.preventDefault();
-                });
-              }
-              else if(responseJson == true) {
-                classes.add("not-visible");
-                register.addEventListener("submit", function() {
-                  register.submit();
-                });
-              }
+          // Prasom serverio duomenu JSON formatu
+          return response.json();
+        })
+        .then(function (responseJson) {
+          // Kai gaunam 100% duomenu JSON formatu, kodas ateina cia
+          const classes = document.querySelector(".error").classList;
+          // responseJson == false
+          if (responseJson == false) {
+            classes.remove("not-visible");
+            register.addEventListener("submit", function (event) {
+              event.preventDefault();
             });
+          } else if (responseJson == true) {
+            classes.add("not-visible");
+            register.addEventListener("submit", function () {
+              register.submit();
             });
-        }
-    </script>
+          }
+        });
+    });
+  }
+</script>
 {% endblock %}

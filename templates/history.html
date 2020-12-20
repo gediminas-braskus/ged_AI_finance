@@ -1,26 +1,23 @@
-{% extends "layout.html" %}
-
-{% block title %}
-    History
-{% endblock %}
-
-{% block main %}
-    <table class="table table-bordered">
-        <tr class="main-row">
-            <th>Stock</th>
-            <th>Symbol</th>
-            <th>Shares</th>
-            <th>Price</th>
-            <th>Date/Time</th>
-        </tr>
-        {% for data in history %}
-        <tr class="rows">
-            <td class="td">{{ data["stock"] }}</td>
-            <td class="td">{{ data["symbol"] }}</td>
-            <td class="{% if data['shares'] >= 0 %}green{% else %}red{% endif %}">{{ data["shares"] }}</td>
-            <td class="td">{{ data["price"]|usd }}</td>
-            <td class="td">{{ data["date"] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+{% extends "layout.html" %} {% block title %} History {% endblock %} {% block
+main %}
+<table class="table table-bordered">
+  <tr class="main-row">
+    <th>Stock</th>
+    <th>Symbol</th>
+    <th>Shares</th>
+    <th>Price</th>
+    <th>Date/Time</th>
+  </tr>
+  {% for data in history %}
+  <tr class="rows">
+    <td class="td">{{ data["stock"] }}</td>
+    <td class="td">{{ data["symbol"] }}</td>
+    <td class="{% if data['shares'] >= 0 %}green{% else %}red{% endif %}">
+      {{ data["shares"] }}
+    </td>
+    <td class="td">{{ data["price"]|usd }}</td>
+    <td class="td">{{ data["date"] }}</td>
+  </tr>
+  {% endfor %}
+</table>
 {% endblock %}
